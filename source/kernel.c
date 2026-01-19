@@ -1,5 +1,28 @@
 #include <stddef.h>
 #include <stdint.h>
+#include "tables.h"
+
+#define PIC1 0x20
+#define PIC2 0xA0
+#define ICW1_INIT 0x11
+#define ICW4_8086 0x01
+
+void init_pic(void){
+	outb(PIC1, ICW1_INIT);
+}
+
+
+// Send byte to hardware port
+static inline void outb(uint16_t port, uint8_t val){
+	asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
+}
+
+// Read a byte from a hardware port
+static inline uint8_t inb(uint16_t port) {
+	uint8_t ret;
+	asm volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
+	return ret;
+}
 
 /* Hardware text mode color constants. */
 enum vga_color {
@@ -113,6 +136,8 @@ void terminal_writestring(const char* data) {
 
 void kernel_main(void) {
 	terminal_initialize();
+	init_gdt();
+	init_idt();
 	terminal_writestring("Hello, 64-bit World!\n");
     terminal_writestring("This text is on a new line.\n");
     terminal_writestring("We have successfully entered Long Mode.");

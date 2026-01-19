@@ -107,3 +107,53 @@ gdt64:
 gdt64_pointer:
     .word . - gdt64 - 1
     .quad gdt64
+
+.global gdt_flush
+.type gdt_flush, @function
+gdt_flush:
+    lgdt (%rdi) /* Load the GDT pointer */
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
+    pop %rdi
+    mov $0x08, %rax
+    push %rax
+    push %rdi
+    lretq
+
+.global tss_flush
+.type tss_flush, @function
+tss_flush:
+    mov $0x28, %ax
+    ltr %ax
+    ret 
+
+.global idt_flush
+.type idt_flush, @function
+idt_flush:
+    lidt (%rdi)
+    ret
+
+.global keyboard_handler_stub
+.extern keyboard_handler_main
+keyboard_handler_stub:
+    pushq %rax
+    pushq %rbxx
+    pushq %rcx
+    pushq %rdx
+    pushq %rdi
+    pushq %rsi 
+
+    call keyboard_handler_main
+
+    popq %rsi
+    popq %rdi
+    popq %rdx
+    popq %rcx
+    popq %rbx
+    popq %rax
+    iretq
+    

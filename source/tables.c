@@ -49,6 +49,25 @@ void init_gdt(){
     // High 8 Bytes of TSS Descriptor
     gdt[6].limit_low = (uint16_t)(tss_base >> 32);
     gdt[6].base_low = (uint16_t)(tss_base >> 48);
-    gdt[6].base_middle = (uint16_t)(tss_base >> 48);
+    gdt[6].base_middle = 0;
+    gdt[6].access = 0;
+    gdt[6].granularity = 0;
+    gdt[6].base_high = 0;
+
+    // Clear TSS and set RSP0
+
+    gdtr.limit = sizeof(gdt) - 1;
+    gdtr.base = (uint64_t)&gdt;
     
+    gdt_flush((uint64_t)&gdtr);
+    tss_flush();
+}
+
+void init_idt() {
+    idtr.limit = sizeof(idt) - 1;
+    idtr.base = (uint64_t)&idt;
+
+    // We will populate gates later
+
+    idt_flush((uint64_t)&idtr);
 }
