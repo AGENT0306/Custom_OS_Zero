@@ -1,0 +1,3 @@
+source/boot.o
+source/myos.bin
+source/kernel.o
